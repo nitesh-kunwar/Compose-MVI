@@ -1,5 +1,6 @@
 package com.demo.compose.ui.movies
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -7,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,15 +17,18 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.demo.compose.R
 import com.demo.compose.data.models.movie.D
+import com.demo.compose.ui.detail.DetailActivity
 import com.google.accompanist.glide.LocalRequestManager
 import com.google.accompanist.glide.rememberGlidePainter
 
@@ -39,8 +44,17 @@ class MoviesListActivity : AppCompatActivity() {
     }
 
 
+    fun startDetailActivity(data:D){
+        val intent = Intent(this,DetailActivity::class.java)
+        intent.putExtra("data",data)
+        startActivity(intent)
+    }
     @Composable
     private fun showContent(state: State<MoviesListViewState>) {
+
+        if(state.value.screenState is ScreenState.OpenDetailScreen){
+            startDetailActivity((state.value.screenState as ScreenState.OpenDetailScreen).data)
+        }
         Log.e("State ", state.value.toString())
         Scaffold(topBar = { AppBar() },
             content = {
@@ -78,16 +92,25 @@ class MoviesListActivity : AppCompatActivity() {
                     .padding(start = 20.dp)
                     .background(color = colorResource(id = R.color.white)),
                 value = state.value.searchString,
-                onValueChange = { viewModel.userIntentChannel.offer(UserIntents.OnTextChanged(it)) },
+                onValueChange = { viewModel.userIntentChannel.trySend(UserIntents.OnTextChanged(it)) },
                 label = { Text(text = "Search Movie") }
             )
-            Image(
-                modifier = Modifier
-                    .padding(vertical = 10.dp, horizontal = 30.dp)
-                    .size(50.dp),
-                painter = painterResource(id = R.drawable.ic_search_black),
-                contentDescription = null
-            )
+            Card(modifier = Modifier
+                .padding(vertical = 10.dp,horizontal = 10.dp )
+                .clip(shape = RoundedCornerShape(10.dp))
+                .size(50.dp)
+                .clickable { viewModel.userIntentChannel.trySend(UserIntents.SearchMovie)}) {
+                if(state.value.isLoading){
+                    CircularProgressIndicator()
+                }else {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_search_black),
+                        contentDescription = null
+                    )
+                }
+
+            }
+
         }
     }
 
@@ -108,7 +131,8 @@ class MoviesListActivity : AppCompatActivity() {
     fun MovieRowComposable(item: D) {
         Card(modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)) {
+            .padding(10.dp)
+            .clickable { viewModel.userIntentChannel.trySend(UserIntents.OpenDetailScreen(item)) }) {
             Row(modifier = Modifier
                 .background(
                     color = colorResource(id = R.color.light_grey)
@@ -124,7 +148,7 @@ class MoviesListActivity : AppCompatActivity() {
                     .padding(10.dp),
                     verticalArrangement = Arrangement.Center) {
                     Text(text = item.l, fontFamily = FontFamily.SansSerif)
-                    Text(modifier = Modifier.padding(top=10.dp), text = item.s!!, fontFamily = FontFamily.Cursive)
+                    Text(modifier = Modifier.padding(top=10.dp), text = item.s ?: "" , fontFamily = FontFamily.Cursive)
                 }
             }
         }
