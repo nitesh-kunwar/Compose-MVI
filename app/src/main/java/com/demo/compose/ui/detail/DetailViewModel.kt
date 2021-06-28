@@ -1,6 +1,5 @@
 package com.demo.compose.ui.detail
 
-import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -21,12 +20,10 @@ class DetailViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             userIntentChannel.consumeAsFlow().collect {
-                reduceUserIntent(_uiState,it)
+                reduceUserIntent(_uiState, it)
             }
         }
     }
-
-
 
 
 }

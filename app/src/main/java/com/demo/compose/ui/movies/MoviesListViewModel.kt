@@ -36,7 +36,7 @@ class MoviesListViewModel : ViewModel() {
 
     suspend fun getSearchedMovies(text: String) {
         viewModelScope.launch {
-            repo.searchMovie(text).collect(){
+            repo.searchMovie(text).collect{
                 reduceMoviesResponse(_uiState,it)
             }
         }

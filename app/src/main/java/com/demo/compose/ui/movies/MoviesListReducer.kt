@@ -18,18 +18,16 @@ suspend fun MoviesListViewModel.reduceUserIntents(
                 )
             } else {
                 _uiState.value = _uiState.value.copy(searchString = userIntents.text)
-//                getSearchedMovies(userIntents.text.trim())
             }
         }
         is UserIntents.SearchMovie -> {
-            if (!_uiState.value.searchString.trim().isEmpty()) {
+            if (_uiState.value.searchString.trim().isNotEmpty()) {
                 _uiState.value = _uiState.value.copy(isLoading = true)
                 getSearchedMovies(_uiState.value.searchString)
             }
         }
         is UserIntents.OpenDetailScreen -> {
-            _uiState.value =
-                _uiState.value.copy(screenState = ScreenState.OpenDetailScreen(userIntents.data))
+            _uiState.value = _uiState.value.copy(screenState = ScreenState.OpenDetailScreen(userIntents.data))
         }
         is UserIntents.ResetScreenState -> {
             _uiState.value = _uiState.value.copy(screenState = ScreenState.Idle)

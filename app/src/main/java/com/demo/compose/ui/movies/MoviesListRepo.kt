@@ -7,22 +7,22 @@ import com.demo.compose.data.network.RetrofitClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import retrofit2.awaitResponse
 
 class MoviesListRepo {
 
 
-    suspend fun  searchMovie(query:String): Flow<ApiResponse<MovieModel>> {
+    suspend fun searchMovie(query: String): Flow<ApiResponse<MovieModel>> {
         return flow {
             val response = RetrofitClient.retrofitService.searchMovie(queryString = query).awaitResponse().body()
             response?.let {
                 Log.e("API RESPONSE ", it.toString())
             }
 
-            emit(ApiResponse<MovieModel>(200, "Success", response, false))
-        }.catch {
-            e->
-            e.message?.let { Log.e("API ERROR " , it) }
+            emit(ApiResponse(200, "Success", response, false))
+        }.catch { e ->
+            e.message?.let { Log.e("API ERROR ", it) }
         }
     }
 

@@ -13,11 +13,10 @@ import kotlinx.coroutines.flow.collect
 
 class DetailActivity : ComponentActivity() {
     private val viewModel by viewModels<DetailViewModel>()
-    lateinit var imageview: ImageView
-    lateinit var title: TextView
-    lateinit var s: TextView
-    lateinit var v: TextView
-    lateinit var vt: TextView
+    private lateinit var imageview: ImageView
+    private lateinit var title: TextView
+    private lateinit var s: TextView
+    private lateinit var vt: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)

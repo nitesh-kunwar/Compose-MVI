@@ -17,19 +17,17 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.demo.compose.R
 import com.demo.compose.data.models.movie.D
 import com.demo.compose.ui.detail.DetailActivity
-import com.google.accompanist.glide.LocalRequestManager
 import com.google.accompanist.glide.rememberGlidePainter
 
 class MoviesListActivity : AppCompatActivity() {
@@ -39,21 +37,23 @@ class MoviesListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val state = viewModel.uiState.collectAsState()
-            showContent(state)
+            ShowContent(state)
         }
     }
 
 
-    fun startDetailActivity(data:D){
-        val intent = Intent(this,DetailActivity::class.java)
-        intent.putExtra("data",data)
+    private fun startDetailActivity(data: D) {
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("data", data)
         startActivity(intent)
     }
-    @Composable
-    private fun showContent(state: State<MoviesListViewState>) {
 
-        if(state.value.screenState is ScreenState.OpenDetailScreen){
+    @Composable
+    private fun ShowContent(state: State<MoviesListViewState>) {
+
+        if (state.value.screenState is ScreenState.OpenDetailScreen) {
             startDetailActivity((state.value.screenState as ScreenState.OpenDetailScreen).data)
+            viewModel.userIntentChannel.trySend(UserIntents.ResetScreenState)
         }
         Log.e("State ", state.value.toString())
         Scaffold(topBar = { AppBar() },
@@ -61,7 +61,8 @@ class MoviesListActivity : AppCompatActivity() {
                 Column(
                     Modifier
                         .fillMaxSize()
-                        .background(color = colorResource(id = R.color.white))) {
+                        .background(color = colorResource(id = R.color.white))
+                ) {
                     SearchView(state)
                     MoviesListComposable(state.value.movies)
                 }
@@ -96,13 +97,13 @@ class MoviesListActivity : AppCompatActivity() {
                 label = { Text(text = "Search Movie") }
             )
             Card(modifier = Modifier
-                .padding(vertical = 10.dp,horizontal = 10.dp )
+                .padding(vertical = 10.dp, horizontal = 10.dp)
                 .clip(shape = RoundedCornerShape(10.dp))
                 .size(50.dp)
-                .clickable { viewModel.userIntentChannel.trySend(UserIntents.SearchMovie)}) {
-                if(state.value.isLoading){
+                .clickable { viewModel.userIntentChannel.trySend(UserIntents.SearchMovie) }) {
+                if (state.value.isLoading) {
                     CircularProgressIndicator()
-                }else {
+                } else {
                     Image(
                         painter = painterResource(id = R.drawable.ic_search_black),
                         contentDescription = null
@@ -116,8 +117,9 @@ class MoviesListActivity : AppCompatActivity() {
 
     @Composable
     private fun MoviesListComposable(movies: List<D>?) {
+
         if (movies == null) {
-            Image(painter = painterResource(id = R.drawable.no_data), contentDescription =null )
+            Image(painter = painterResource(id = R.drawable.no_data), contentDescription = null)
         } else {
             LazyColumn(Modifier.fillMaxWidth()) {
                 items(movies) { item -> MovieRowComposable(item) }
@@ -133,22 +135,34 @@ class MoviesListActivity : AppCompatActivity() {
             .fillMaxWidth()
             .padding(10.dp)
             .clickable { viewModel.userIntentChannel.trySend(UserIntents.OpenDetailScreen(item)) }) {
-            Row(modifier = Modifier
-                .background(
-                    color = colorResource(id = R.color.light_grey)
-                )
-                .padding(5.dp)
-                ) {
-                Image(modifier = Modifier.size(80.dp),
-                    painter =  rememberGlidePainter(request = item.i?.imageUrl, previewPlaceholder = R.drawable.ic_search),
+            Row(
+                modifier = Modifier
+                    .background(
+                        color = colorResource(id = R.color.light_grey)
+                    )
+                    .padding(5.dp)
+            ) {
+                Image(
+                    modifier = Modifier.size(80.dp),
+                    painter = rememberGlidePainter(
+                        request = item.i?.imageUrl,
+                        previewPlaceholder = R.drawable.ic_search
+                    ),
                     contentDescription = null,
-                    contentScale = ContentScale.Crop)
-                Column(modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(10.dp),
-                    verticalArrangement = Arrangement.Center) {
+                    contentScale = ContentScale.Crop
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(10.dp),
+                    verticalArrangement = Arrangement.Center
+                ) {
                     Text(text = item.l, fontFamily = FontFamily.SansSerif)
-                    Text(modifier = Modifier.padding(top=10.dp), text = item.s ?: "" , fontFamily = FontFamily.Cursive)
+                    Text(
+                        modifier = Modifier.padding(top = 10.dp),
+                        text = item.s ?: "",
+                        fontFamily = FontFamily.Cursive
+                    )
                 }
             }
         }
