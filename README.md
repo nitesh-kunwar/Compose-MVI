@@ -3,7 +3,7 @@ An MVI project setup using Jetpack compose. This would be a good place to start 
 
 #Android #Jetpack #Compose #MVI #Coroutine #Kotlin
 
-#Prerequisite 
+# Prerequisite 
 
 1:- Android studio Arctic Fox
 
