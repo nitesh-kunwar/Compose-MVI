@@ -12,7 +12,7 @@ interface ApiService {
 
 
 
-    @Headers("x-rapidapi-key: de2f155dc4msh92ff4135a3d3c4fp1d3fefjsncedf95ba5786")
+    @Headers("x-rapidapi-key: 87419eb20dmsh52ed93a5230a7e1p13fa67jsn8dbec5823699")
     @GET("/auto-complete")
     fun searchMovie(@Query("q") queryString: String): Call<MovieModel>
 
